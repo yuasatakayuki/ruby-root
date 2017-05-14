@@ -19,8 +19,7 @@ DEFAULT_CANVAS_HEIGHT = 400
 def create_canvas(name = 'c', title = 'Canvas',
                   w = DEFAULT_CANVAS_WIDTH,
                   h = DEFAULT_CANVAS_HEIGHT)
-  c = Root::TCanvas.create(name.to_s, title, w, h)
-  c
+  Root::TCanvas.create(name.to_s, title, w, h)
 end
 
 def create_file(file_name)
@@ -35,7 +34,7 @@ def close_file(file)
   file.Close()
 end
 
-module GROWTH
+module Root
   class TFile
     def get(name)
       self.Get(name.to_s)
@@ -52,8 +51,7 @@ end
 #---------------------------------------------
 # Syntax sugar for plottable objects
 #---------------------------------------------
-module Root
-  module Plottable
+  module Root::Plottable
     def plot(option = '')
       self.Draw(option.to_s)
     end
@@ -345,8 +343,12 @@ module Root
     }
 
     def color(color)
-      if !@@color_map[color].nil?
-        rgb = @@color_map[color].map { |e| e / 255.0 }
+      puts "Color #{color}"
+      puts "#{color.instance_of?(String)}"
+      puts "#{color.instance_of?(Symbol)}"
+      puts "#{color.to_sym}"
+      if (color.instance_of?(String) or color.instance_of?(Symbol)) && !@@color_map[color.to_sym].nil?
+        rgb = @@color_map[color.to_sym].map { |e| e / 255.0 }
         colorNumber = Root::TColor::GetColor(rgb[0], rgb[1], rgb[2])
         self.SetLineColor(colorNumber)
         self.SetMarkerColor(colorNumber)
@@ -462,7 +464,7 @@ module Root
     alias no_x delete_x_axis
   end
 
-  module PlotManipulator
+  module Root::PlotManipulator
     private
 
     def set_font_if_nil
@@ -499,7 +501,7 @@ module Root
     end
   end
 
-  module PadManipulator
+  module Root::PadManipulator
     # log
     def log(axes = 'xyz')
       axes.downcase!
@@ -530,6 +532,11 @@ module Root
       self.SetLogy(mode)
       self.SetLogz(mode)
     end
+
+    alias log_x logx
+    alias log_y logy
+    alias log_z logz
+    alias log_xy logxy
 
     def log_off
       logxyz(0)
@@ -650,6 +657,7 @@ module Root
     end
   end
 
+module Root
   class TVirtualPad
     include PlotManipulator
     include PadManipulator
@@ -682,8 +690,9 @@ module Root
       [getX(i), getY(i)]
     end
   end
+end
 
-  module HistogramManipulationInterface
+  module Root::HistogramManipulationInterface
     def clone(new_name)
       xaxis = self.GetXaxis()
       h = TH1D.create(new_name, new_name,
@@ -751,7 +760,7 @@ EOS
   end
 
   class TH1D
-    include HistogramManipulationInterface
+    include Root::HistogramManipulationInterface
   end
 
   #---------------------------------------------
@@ -775,19 +784,19 @@ EOS
     puts "#{g.GetN} data points have been added to graph named '#{graph_name}'"
     g
   end
-end
 
 #---------------------------------------------
 # Mix in
 #---------------------------------------------
+  class Root::TH1D
+    include Root::Plottable
+  end
+
 module Root
   class TGraph
     include Root::Plottable
   end
 
-  class TH1D
-    include Root::Plottable
-  end
 
   class TH1F
     include Root::Plottable

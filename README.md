@@ -4,6 +4,23 @@ root.rb provides syntax-sugar methods for
 [RubyROOT](https://github.com/odakahirokazu/RubyROOT) which is a Ruby binding of
 the [CERN's ROOT data analysis framework](https://root.cern.ch).
 
+
+## Prerequisites
+
+- ROOT
+- RubyROOT
+
+```
+homebrew/science
+brew install root
+brew tap growth-team/brew
+brew install rubyroot
+
+# Add the following to $HOME/.zshrc or $HOME/.bashrc
+export RUBYLIB=/usr/local/lib/ruby:$RUBYLIB
+```
+
+
 ## Example: Histogram styling
 
 Histogram and graph objects provide the `set` method which takes a block of
